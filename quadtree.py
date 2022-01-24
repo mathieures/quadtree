@@ -1,5 +1,5 @@
 from Rectangle import Rectangle, DrawnRectangle
-
+import color
 
 class Quadtree:
     """Un quadtree, ou arbre quartique"""
@@ -7,7 +7,8 @@ class Quadtree:
     # MAX_OBJECTS = 10
     MAX_LEVELS = 5
 
-    def __init__(self, level, bounds):
+    def __init__(self, window, level, bounds):
+        self.window = window # la fenêtre où afficher les zones
         self.level = level # 0 étant la racine
         self.bounds = bounds # l'espace 2D que le node occupe, un Rectangle
         self.objects = [] # liste d'objets, ici pour l'exemple des objets Rectangle
@@ -27,16 +28,16 @@ class Quadtree:
         sub_height = self.bounds.height // 2
         x, y = self.bounds.x, self.bounds.y
 
-        self.nodes[0] = Quadtree(self.level + 1, Rectangle(x + sub_width, y, sub_width, sub_height)) # en haut à droite
-        self.nodes[1] = Quadtree(self.level + 1, Rectangle(x, y, sub_width, sub_height)) # en haut à gauche
-        self.nodes[2] = Quadtree(self.level + 1, Rectangle(x, y + sub_height, sub_width, sub_height)) # en bas à gauche
-        self.nodes[3] = Quadtree(self.level + 1, Rectangle(x + sub_width, y + sub_height, sub_width, sub_height)) # en bas à droite
+        self.nodes[0] = Quadtree(self.window, self.level + 1, Rectangle(x + sub_width, y, sub_width, sub_height)) # en haut à droite
+        self.nodes[1] = Quadtree(self.window, self.level + 1, Rectangle(x, y, sub_width, sub_height)) # en haut à gauche
+        self.nodes[2] = Quadtree(self.window, self.level + 1, Rectangle(x, y + sub_height, sub_width, sub_height)) # en bas à gauche
+        self.nodes[3] = Quadtree(self.window, self.level + 1, Rectangle(x + sub_width, y + sub_height, sub_width, sub_height)) # en bas à droite
 
         # On dessine les zones, pour le debug
-        DrawnRectangle(x + sub_width, y, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
-        DrawnRectangle(x, y, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
-        DrawnRectangle(x, y + sub_height, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
-        DrawnRectangle(x + sub_width, y + sub_height, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
+        DrawnRectangle(x + sub_width, y, sub_width, sub_height, color=color.RED, parent=self.window)
+        DrawnRectangle(x, y, sub_width, sub_height, color=color.RED, parent=self.window)
+        DrawnRectangle(x, y + sub_height, sub_width, sub_height, color=color.RED, parent=self.window)
+        DrawnRectangle(x + sub_width, y + sub_height, sub_width, sub_height, color=color.RED, parent=self.window)
 
     def get_index(self, rect):
         """
@@ -100,18 +101,18 @@ class Quadtree:
                 else:
                     i += 1
 
-    def retrieve(self, rect, collisions_potentielles=None):
+    def retrieve(self, rect, potential_collisions=None):
         """
         Retourne tous les objets qui pourraient
         collide avec l'objet donné en paramètre
         """
-        if collisions_potentielles is None:
-            collisions_potentielles = []
+        if potential_collisions is None:
+            potential_collisions = []
 
         index = self.get_index(rect)
         if index != -1 and self.nodes[0] is not None:
-            self.nodes[index].retrieve(rect, collisions_potentielles)
+            self.nodes[index].retrieve(rect, potential_collisions)
 
-        collisions_potentielles.extend(self.objects)
-        # print(f"{collisions_potentielles}")
-        return collisions_potentielles
+        potential_collisions.extend(self.objects)
+        # print(f"{potential_collisions}")
+        return potential_collisions
