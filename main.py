@@ -18,7 +18,7 @@ def update():
     for objet in OBJETS:
         QUAD.insert(objet)
 
-    # On parcourt tous les objets en trouvant quels objets chacun pourrait collide
+    # On parcourt tous les objets en trouvant avec quels objets chacun pourrait collide
     for objet in OBJETS:
         collisions_potentielles = set(QUAD.retrieve(objet))
         collisions_potentielles.discard(objet)
