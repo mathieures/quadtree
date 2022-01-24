@@ -1,45 +1,4 @@
-# https://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374
-from random import randrange
-
-import dearpygui.dearpygui as dpg
-
-
-class Rectangle:
-    """Un rectangle, constitué d'un point et de dimensions"""
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-
-    def __repr__(self):
-        return f"{type(self).__name__}, {self.x, self.y, self.width, self.height}"
-
-
-class DrawnRectangle(Rectangle):
-    """Un Rectangle mais qui est affiché graphiquement"""
-    def __init__(self, x, y, width, height, **kwargs):
-        super().__init__(x, y, width, height)
-
-        self.tag = dpg.draw_rectangle(
-            (self.x, self.y),
-            (self.x + self.width, self.y + self.height),
-            **kwargs
-        )
-
-    def check_collision(self, objet):
-        """Check les collisions avec un autre objet"""
-        self_x2, self_y2 = self.x + self.width, self.y + self.height
-        objet_x2, objet_y2 = objet.x + objet.width, objet.y + objet.height
-
-        if (self.x < objet_x2 and self_x2 > objet.x) and (
-            self.y < objet_y2 and self_y2 > objet.y):
-                self.action_collision()
-                objet.action_collision()
-
-    def action_collision(self):
-        """L'action déclenchée par une collision"""
-        dpg.configure_item(self.tag, fill=(0, 255, 0))
+from Rectangle import Rectangle, DrawnRectangle
 
 
 class Quadtree:
@@ -73,7 +32,7 @@ class Quadtree:
         self.nodes[2] = Quadtree(self.level + 1, Rectangle(x, y + sub_height, sub_width, sub_height)) # en bas à gauche
         self.nodes[3] = Quadtree(self.level + 1, Rectangle(x + sub_width, y + sub_height, sub_width, sub_height)) # en bas à droite
 
-        # on dessine les zones
+        # On dessine les zones, pour le debug
         DrawnRectangle(x + sub_width, y, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
         DrawnRectangle(x, y, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
         DrawnRectangle(x, y + sub_height, sub_width, sub_height, color=(255, 0, 0), parent="primary_window")
@@ -156,69 +115,3 @@ class Quadtree:
         collisions_potentielles.extend(self.objects)
         # print(f"{collisions_potentielles}")
         return collisions_potentielles
-
-
-def rand_coords(limit=500):
-    """Paire de coordonnées aléatoires"""
-    return (randrange(limit), randrange(limit))
-
-def update():
-    global QUAD
-    global OBJETS
-    # On recrée l'arbre
-    QUAD.clear()
-    for objet in OBJETS:
-        QUAD.insert(objet)
-
-    # On parcourt tous les objets en trouvant quels objets chacun pourrait collide
-    for objet in OBJETS:
-        collisions_potentielles = set(QUAD.retrieve(objet))
-        collisions_potentielles.discard(objet)
-        # On peut maintenant vérifier les collisions seulement avec ces objets
-        for autre in collisions_potentielles:
-            objet.check_collision(autre)
-
-def main():
-    global QUAD
-    global OBJETS
-    
-    dimensions_fenetre = (400, 400)
-    nb_objets = 40
-
-    OBJETS = []
-    QUAD = Quadtree(level=0, bounds=Rectangle(0, 0, *[int(dim // 1.1) for dim in dimensions_fenetre]))
-
-
-
-    dpg.create_context()
-
-    with dpg.window(tag="primary_window"):
-        OBJETS = [
-            DrawnRectangle(
-                *rand_coords(int(dimensions_fenetre[0] // 1.3)),
-                30, 30,
-                color=(0,0,0)
-            ) for _ in range(nb_objets)]
-
-    dpg.set_primary_window("primary_window", True)
-
-    with dpg.theme() as global_theme:
-        with dpg.theme_component(dpg.mvAll):
-            dpg.add_theme_color(dpg.mvThemeCol_WindowBg, (200, 200, 200))
-    dpg.bind_theme(global_theme)
-
-
-    dpg.create_viewport(width=dimensions_fenetre[0], height=dimensions_fenetre[1] + 20)
-    dpg.setup_dearpygui()
-    dpg.show_viewport()
-
-
-    # dpg.start_dearpygui()
-    # below replaces, start_dearpygui()
-    while dpg.is_dearpygui_running() and len(OBJETS) != 0:
-        update()
-        dpg.render_dearpygui_frame()
-    dpg.destroy_context()
-
-if __name__ == '__main__':
-    main()
