@@ -15,20 +15,19 @@ def rand_coords(limit=500):
 
 def update():
     """
-    Exécuté toutes les frames
-    Dans ce projet on n'en a pas besoin en réalité, car
-    les objets ne bougent pas, mais c'est pour l'exemple
+    Executed every frame (we don't need it in this project
+    since the objects don't move, but it's an example)
     """
-    # On recrée l'arbre
+    # Recreate the tree
     QUAD.clear()
     for obj in OBJECTS:
         QUAD.insert(obj)
 
-    # On parcourt tous les objets en trouvant avec quels objeCts chacun pourrait collide
+    # Loop through the objects to find which objects each could collide with
     for obj in OBJECTS:
         potential_collisions = set(QUAD.retrieve(obj))
         potential_collisions.discard(obj)
-        # On peut maintenant vérifier les collisions seulement avec ces objeCts
+        # We can now check collisions only with these objects
         for other in potential_collisions:
             obj.check_collision(other)
 
@@ -65,7 +64,7 @@ dpg.create_viewport(width=DIMENSIONS[0], height=DIMENSIONS[1] + 20)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 
-# below replaces `start_dearpygui()`
+# Main loop
 while dpg.is_dearpygui_running() and len(OBJECTS) != 0:
     update()
     dpg.render_dearpygui_frame()

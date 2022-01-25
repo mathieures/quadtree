@@ -1,8 +1,9 @@
 import dearpygui.dearpygui as dpg
+import color
 
 
 class Rectangle:
-    """Un rectangle, constitué d'un point et de dimensions"""
+    """A rectangle, a point with dimensions"""
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -14,7 +15,7 @@ class Rectangle:
 
 
 class DrawnRectangle(Rectangle):
-    """Un Rectangle mais qui est affiché graphiquement"""
+    """A rectangle, but graphically displayed"""
     def __init__(self, x, y, width, height, **kwargs):
         super().__init__(x, y, width, height)
 
@@ -25,7 +26,7 @@ class DrawnRectangle(Rectangle):
         )
 
     def check_collision(self, objet):
-        """Check les collisions avec un autre objet"""
+        """Check collisions with the given object"""
         self_x2, self_y2 = self.x + self.width, self.y + self.height
         objet_x2, objet_y2 = objet.x + objet.width, objet.y + objet.height
 
@@ -35,5 +36,5 @@ class DrawnRectangle(Rectangle):
                 objet.action_collision()
 
     def action_collision(self):
-        """L'action déclenchée par une collision"""
-        dpg.configure_item(self.tag, fill=(0, 255, 0))
+        """Callback function used after a collision"""
+        dpg.configure_item(self.tag, fill=color.GREEN)
